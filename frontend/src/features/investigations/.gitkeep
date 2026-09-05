@@ -1,0 +1,1 @@
+# Feature modules hold hooks, queries, and domain UI that is not shared globally.

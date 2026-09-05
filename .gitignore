@@ -26,8 +26,10 @@ wheels/
 db.sqlite3
 db.sqlite3-journal
 local_settings.py
-.dvc/
 *.log
+staticfiles/
+celerybeat-schedule
+celerybeat-schedule.*
 
 # Node / React / Frontend
 node_modules/
@@ -48,6 +50,12 @@ dist-ssr/
 .env
 .env.local
 .env.*.local
+
+# AI model weights (too large / often licensed)
+ai/models/*.pt
+ai/models/*.onnx
+ai/models/*.pkl
+ai/models/*.h5
 
 # IDEs and Editors
 .vscode/

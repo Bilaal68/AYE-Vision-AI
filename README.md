@@ -1,110 +1,69 @@
 # Security Intelligence Platform
 
-A modular security intelligence and cyber defense platform prototype designed for threat detection, incident management, geospatial visualization, graph correlation, and AI-assisted investigation.
+Learning project: a situational-awareness foundation (React + Django), not a finished intelligence system.
 
----
+This repository currently provides **architecture and wiring only**. Camera, vehicle, satellite, identity, and financial features are placeholders.
 
-## 📁 Repository Structure
+## What runs today
 
 ```
-security-intelligence-platform/
-├── backend/                      # Django + DRF application
-│   ├── config/                   # Django project settings & config
-│   ├── apps/
-│   │   ├── events/                # Event ingestion models, views, serializers
-│   │   ├── incidents/              # Incident/case management
-│   │   ├── entities/              # Entities, vehicles, devices, orgs
-│   │   ├── graph/                  # Relationship/edges model
-│   │   ├── investigations/         # Investigation workspace
-│   │   ├── accounts/               # Auth, roles, permissions
-│   │   └── audit/                  # Audit logging
-│   ├── requirements.txt
-│   ├── manage.py
-│   └── Dockerfile
-├── ml-service/                    # FastAPI ML/AI microservice
-│   ├── app/
-│   │   ├── anomaly_detection/     # Isolation Forest / anomaly scoring
-│   │   ├── rag_assistant/          # AI analyst RAG pipeline
-│   │   ├── correlation/            # Event correlation logic
-│   │   └── main.py                 # Health check endpoint GET /health
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/                      # React analyst dashboard
-│   ├── src/
-│   │   ├── components/            # Visual components (dashboard, map, graph, etc.)
-│   │   ├── pages/                 # Dashboard, Incidents, Investigations pages
-│   │   ├── services/               # API client code
-│   │   ├── hooks/                  # Custom React hooks
-│   │   └── App.jsx
-│   ├── package.json
-│   └── Dockerfile
-├── cyber-range/                   # Isolated adversary simulation environment
-│   ├── vulnerable-services/        # Intentionally vulnerable containers
-│   ├── detection-tests/            # Attack test suites
-│   ├── docker-compose.cyberrange.yml # SEPARATE compose file, isolated network
-│   └── README.md
-├── infra/
-│   ├── docker-compose.yml         # Main stack orchestrator (backend, ml-service, frontend, db)
-│   ├── postgres/
-│   │   ├── Dockerfile              # PostGIS + pgvector PostgreSQL container
-│   │   └── init.sql                # Enables PostGIS & pgvector extensions
-│   └── nginx/                      # Nginx reverse proxy configuration
-├── docs/                          # Architecture notes and documentation
-│   └── architecture.md
-├── .env.example                   # Environment configuration template
-├── .gitignore                     # Git ignore file
-├── docker-compose.yml             # Root wrapper compose file
-└── README.md
+Frontend (Vite / React)
+        ↓  GET /api/health/
+Django REST API
+        ↓
+PostgreSQL (PostGIS extension enabled)
+Redis (Celery broker; no jobs yet)
 ```
 
----
+## Quick start (Docker)
 
-## 🚀 Quick Start
-
-### Prerequisites
-- [Docker](https://www.docker.com/) (v20.10+)
-- [Docker Compose](https://docs.docker.com/compose/) (v2.0+)
-
-### 1. Environment Setup
-Copy `.env.example` to create your local `.env` configuration:
 ```bash
 cp .env.example .env
-```
-
-### 2. Run Main Application Stack
-Start all core platform services (`backend`, `ml-service`, `frontend`, `db`) with a single command:
-```bash
 docker compose up --build
 ```
-*Or using the infra directory file directly:*
+
+- Frontend: http://localhost:5173
+- API health: http://localhost:8000/api/health/
+- Django admin: http://localhost:8000/admin/
+
+Create an admin user (optional):
+
 ```bash
-docker compose -f infra/docker-compose.yml up --build
+docker compose exec backend python manage.py createsuperuser
 ```
 
-### 3. Access Services
-- **Frontend Dashboard**: [http://localhost:5173](http://localhost:5173)
-- **Django Backend API**: [http://localhost:8000/api/health/](http://localhost:8000/api/health/)
-- **ML/AI Microservice**: [http://localhost:8001/health](http://localhost:8001/health)
-- **PostgreSQL Database**: `localhost:5432` (`secint_db`)
+## Quick start (local processes)
 
----
+You still need PostgreSQL and Redis. Easiest: start only those with Docker, run apps on the host.
 
-## 🎯 Cyber Range Environment (Isolated)
-
-The Cyber Range is kept **strictly isolated** on its own network (`cyberrange_net`).
-
-To boot the Cyber Range simulation environment:
 ```bash
-docker compose -f cyber-range/docker-compose.cyberrange.yml up --build -d
+cp .env.example .env
+docker compose up db redis -d
+
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
+
+cd ../frontend
+npm install
+npm run dev
 ```
-Target web endpoint: [http://localhost:8088](http://localhost:8088)
 
----
+The Vite dev server proxies `/api` to Django (`localhost:8000`, or `backend:8000` in Compose).
 
-## 🧪 Service Health & Verification
+## Documentation
 
-Check container health status:
-```bash
-docker compose ps
-```
-All containers include automated health check probes to ensure database readines and inter-service communication.
+| Topic | File |
+| --- | --- |
+| Architecture | [docs/architecture/overview.md](docs/architecture/overview.md) |
+| Frontend | [docs/architecture/frontend.md](docs/architecture/frontend.md) |
+| Backend | [docs/architecture/backend.md](docs/architecture/backend.md) |
+| Database | [docs/database/overview.md](docs/database/overview.md) |
+| AI layout | [docs/architecture/ai-services.md](docs/architecture/ai-services.md) |
+| Data flow | [docs/architecture/data-flow.md](docs/architecture/data-flow.md) |
+| Day-to-day workflow | [docs/development/getting-started.md](docs/development/getting-started.md) |
+
+Previous cyber-range / FastAPI ML service code is kept under `docs/archive/` so nothing useful was thrown away. It is **not** part of the running foundation.

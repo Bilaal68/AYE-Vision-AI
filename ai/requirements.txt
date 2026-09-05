@@ -1,0 +1,2 @@
+# Optional AI/CV dependencies — install only when you start Prototype vision work.
+# opencv-python-headless>=4.8.0

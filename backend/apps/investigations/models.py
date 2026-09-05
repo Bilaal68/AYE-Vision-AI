@@ -1,3 +1,4 @@
-from django.db import models
+"""Investigation workspaces (models in Prototype 1).
 
-# Investigation workspace models placeholder
+This file is intentionally almost empty. Add models when you build the feature.
+"""

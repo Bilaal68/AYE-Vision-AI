@@ -1,0 +1,10 @@
+[
+  {
+    "id": "cam-001",
+    "name": "Synthetic camera A",
+    "city": "Example City",
+    "lat": 9.03,
+    "lng": 38.74,
+    "status": "offline"
+  }
+]

@@ -1,18 +1,20 @@
 from django.contrib import admin
-from django.urls import path, include
-from django.http import JsonResponse
+from django.urls import include, path
 
-def health_check(request):
-    return JsonResponse({"status": "ok", "service": "backend"})
+from apps.system_monitoring.views import HealthCheckView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/health/', health_check, name='health_check'),
-    path('api/events/', include('apps.events.urls')),
-    path('api/incidents/', include('apps.incidents.urls')),
-    path('api/entities/', include('apps.entities.urls')),
-    path('api/graph/', include('apps.graph.urls')),
-    path('api/investigations/', include('apps.investigations.urls')),
-    path('api/accounts/', include('apps.accounts.urls')),
-    path('api/audit/', include('apps.audit.urls')),
+    path("admin/", admin.site.urls),
+    path("api/health/", HealthCheckView.as_view(), name="health-check"),
+    path("api/auth/", include("apps.users.urls")),
+    path("api/investigations/", include("apps.investigations.urls")),
+    path("api/cameras/", include("apps.cameras.urls")),
+    path("api/vehicles/", include("apps.vehicles.urls")),
+    path("api/satellite/", include("apps.satellite.urls")),
+    path("api/incidents/", include("apps.incidents.urls")),
+    path("api/alerts/", include("apps.alerts.urls")),
+    path("api/identity/", include("apps.identity.urls")),
+    path("api/financial/", include("apps.financial.urls")),
+    path("api/intelligence/", include("apps.intelligence.urls")),
+    path("api/system/", include("apps.system_monitoring.urls")),
 ]

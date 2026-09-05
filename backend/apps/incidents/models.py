@@ -1,3 +1,4 @@
-from django.db import models
+"""Incident / case records (not implemented).
 
-# Incidents management models placeholder
+This file is intentionally almost empty. Add models when you build the feature.
+"""
