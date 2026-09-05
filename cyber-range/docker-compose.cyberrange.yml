@@ -1,0 +1,21 @@
+version: '3.8'
+
+# ISOLATED CYBER RANGE ADVERSARY SIMULATION ENVIRONMENT
+# IMPORTANT: This stack runs on 'cyberrange_net' and MUST NEVER share a network with the main application stack.
+
+services:
+  target-service:
+    build:
+      context: ./vulnerable-services
+      dockerfile: Dockerfile
+    container_name: cyberrange_target
+    restart: always
+    ports:
+      - "8088:8080"
+    networks:
+      - cyberrange_net
+
+networks:
+  cyberrange_net:
+    driver: bridge
+    name: cyberrange_net

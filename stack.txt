@@ -1,0 +1,46 @@
+Backend / API
+
+Django + DRF
+
+Database
+
+PostgreSQL (core relational data)
+PostGIS extension (geospatial — map, clustering, location queries)
+pgvector extension (embeddings for AI Analyst RAG retrieval)
+Relationships/graph stored as an edges table inside Postgres (no separate graph DB)
+
+ML / AI Service
+
+Separate Python microservice (FastAPI)
+scikit-learn (anomaly detection — Isolation Forest to start)
+RAG pipeline for the AI Analyst Assistant
+Communicates with Django over internal REST calls
+
+Frontend / Dashboard
+
+React
+Leaflet (live map)
+react-force-graph (intelligence graph visualization)
+Recharts (or similar, for charts/stats panels)
+
+Real-time updates
+
+Start with simple polling
+Add Django Channels (WebSockets) later, once the core ingest → correlate → display loop works
+
+Auth / Access Control
+
+Django built-in auth + DRF permissions (role-based access control)
+
+File / Evidence Storage
+
+Firebase or S3-compatible storage on your VPS
+
+Deployment
+
+Docker Compose (Django, Postgres, ML service, React frontend all containerized)
+Your existing VPS for hosting
+
+Cyber Range
+
+Fully separate, network-isolated environment (VMs/Docker with intentionally vulnerable services) — kept apart from the main platform stack for safety

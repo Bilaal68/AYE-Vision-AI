@@ -1,0 +1,113 @@
+version: '3.8'
+
+# Root convenience compose configuration wrapping infra/docker-compose.yml
+services:
+  db:
+    build:
+      context: ./infra/postgres
+      dockerfile: Dockerfile
+    container_name: secint_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-secint_db}
+      POSTGRES_USER: ${POSTGRES_USER:-secint_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secint_secure_password_change_me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-secint_admin} -d ${POSTGRES_DB:-secint_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secint_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: secint_backend
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-secint_db}
+      POSTGRES_USER: ${POSTGRES_USER:-secint_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secint_secure_password_change_me}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-placeholder-key}
+      DEBUG: "True"
+      ML_SERVICE_URL: ${ML_SERVICE_URL:-http://ml-service:8000}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secint_net
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: secint_ml_service
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./ml-service:/app
+    ports:
+      - "8001:8000"
+    environment:
+      PORT: 8000
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-placeholder}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secint_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: secint_frontend
+    restart: always
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+      VITE_ML_SERVICE_URL: http://localhost:8001
+    depends_on:
+      - backend
+      - ml-service
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secint_net
+
+networks:
+  secint_net:
+    driver: bridge
+    name: secint_net
+
+volumes:
+  postgres_data:
