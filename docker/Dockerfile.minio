@@ -1,0 +1,9 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+COPY docker/s3mock/server.py /app/server.py
+
+EXPOSE 9000 9001
+VOLUME ["/data"]
+
+CMD ["python", "/app/server.py"]
